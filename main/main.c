@@ -13,8 +13,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "motor_control.h"
+#include "battery_monitor.h"
 #include "led_control.h"
+#include "motor_control.h"
 
 #define TEST_MODE
 
@@ -47,6 +48,11 @@ void device_test(void)
                 activity_led_state = 1;
             }
             
+            if (!(x%10))
+            {
+                printf("Battery voltage: %f\n", battery_status);
+            }
+            
             vTaskDelay(10/portTICK_RATE_MS);
         }
     }
@@ -57,10 +63,12 @@ void app_main(void)
     // Subcomponent setup
     motor_control_setup();
     led_control_setup();
+    battery_monitor_setup();
     
     // Start subcomponent tasks
     xTaskCreate(motor_control_task, "motor_control", 4096, NULL, 5, NULL);
     xTaskCreate(led_control_task, "led_control", 4096, NULL, 5, NULL);
+    xTaskCreate(battery_monitor_task, "battery_monitor", 4096, NULL, 5, NULL);
     
 #ifdef TEST_MODE
     device_test();
