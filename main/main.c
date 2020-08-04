@@ -14,15 +14,16 @@
 #include "freertos/task.h"
 
 #include "motor_control.h"
+#include "led_control.h"
 
+#define TEST_MODE
 
-
-void app_main(void)
+/*
+ * This does stuff so that we can see everything works nicely
+ */
+void device_test(void)
 {
-    float x;
-    motor_control_setup();
-    
-    xTaskCreate(motor_control_task, "motor_control", 4096, NULL, 5, NULL);
+    int x;
     
     while (1)
     {
@@ -30,7 +31,44 @@ void app_main(void)
         {
             motor_1_pwm = x;
             motor_2_pwm = x;
+            
+            if (x == 33)
+            {
+                wifi_led_state = 1;
+            }
+            
+            if (x == 66)
+            {
+                server_led_state = 1;
+            }
+            
+            if (x == 99)
+            {
+                activity_led_state = 1;
+            }
+            
             vTaskDelay(10/portTICK_RATE_MS);
         }
     }
+}
+
+void app_main(void)
+{
+    // Subcomponent setup
+    motor_control_setup();
+    led_control_setup();
+    
+    // Start subcomponent tasks
+    xTaskCreate(motor_control_task, "motor_control", 4096, NULL, 5, NULL);
+    xTaskCreate(led_control_task, "led_control", 4096, NULL, 5, NULL);
+    
+#ifdef TEST_MODE
+    device_test();
+#else
+    while(1)
+    {
+        vTaskDelay(1000/portTICK_RATE_MS);
+    }
+#endif
+
 }
