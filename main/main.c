@@ -9,16 +9,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <lwip/netdb.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
 #include "esp_system.h"
+#include "nvs_flash.h"
+#include "esp_netif.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
 
 #include "battery_monitor.h"
 #include "led_control.h"
 #include "motor_control.h"
 #include "bluetooth_spp.h"
+#include "wifi.h"
+#include "udp_server.h"
 
 //#define TEST_MODE
 #define BLUETOOTH
@@ -166,6 +173,23 @@ void console_task(void)
                     if (user_input == 10 || user_input == 3) // Until user presses enter or ctrl+c (FIXME: is this a good one?
                     {
                         printf("\n");
+
+                        /*
+                        TODO: Write WIFI config. Perhaps like this:
+                        wifi_config_t wifi_config = {
+                            .sta = {
+                                .ssid = "selected ssid",
+                                .password = "my super secret password",
+                            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+                                .pmf_cfg = {
+                                    .capable = true,
+                                    .required = false
+                                },
+                            },
+                        };
+                        ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+                        */
+
                         break;
                     }
                     
@@ -263,6 +287,10 @@ void device_test(void)
 
 void app_main(void)
 {
+    ESP_ERROR_CHECK(nvs_flash_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    connect_wifi();
+
     // Subcomponent setup
     motor_control_setup();
     led_control_setup();
@@ -272,6 +300,7 @@ void app_main(void)
     xTaskCreate(motor_control_task, "motor_control", 4096, NULL, 5, NULL);
     xTaskCreate(led_control_task, "led_control", 4096, NULL, 5, NULL);
     xTaskCreate(battery_monitor_task, "battery_monitor", 4096, NULL, 5, NULL);
+    xTaskCreate(udp_server_task, "udp_server", 4096, (void*)AF_INET, 5, NULL);
     
 #ifdef TEST_MODE
     device_test();
