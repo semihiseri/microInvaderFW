@@ -12,6 +12,9 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+char *USER_PROMPT = " user > ";
+char *ROBOT_PROMPT = "robot > ";
+
 char get_user_input_character(char *prompt, bool is_silent) {
     printf(prompt);
     char user_input = 255;
@@ -39,8 +42,11 @@ void show_help()
     printf("robot > no mercy for the helpless \n"
         "robot > just follow the instructions \n"
         "robot > press y to continue \n");
+}
 
-    /*char sad_messages[] [64] = {
+void print_sad_message()
+{
+    char sad_messages[] [64] = {
         "let's pretend it didn't happen",
         "here, another chance for you",
         "we can forget this", 
@@ -48,7 +54,10 @@ void show_help()
         "humans make mistakes",
         "let's try again",
         "hopeless... go again",
-    };*/
+    };
+
+    int message_id = esp_random()%(sizeof(sad_messages)/(64*sizeof(char)));
+    printf("%s%s\n", ROBOT_PROMPT, sad_messages[message_id]);
 }
 
 void show_ip(char* ip_address)
@@ -62,7 +71,7 @@ void show_ip(char* ip_address)
     }
     As a workaround the ip address is passed along to this task
     */
-    printf("robot > IP address: %s\n", ip_address);
+    printf("%sIP address: %s\n", ROBOT_PROMPT, ip_address);
 }
 
 void configure_wifi()
@@ -136,11 +145,11 @@ void console_task(char *ip_address)
 {
     initialize_console();
 
-    // wait half a second for the other tasks to stop outputting init messages
-    vTaskDelay(500/portTICK_RATE_MS);
+    // wait for a second for the other tasks to stop outputting init messages
+    vTaskDelay(1000/portTICK_RATE_MS);
 
     // ensure the user sees the welcome screen by waiting for key press
-    get_user_input_character("", true);
+    get_user_input_character("Press any key to start terminal", true);
 
     int probe_status = linenoiseProbe();
     if (probe_status) {
@@ -162,7 +171,7 @@ void console_task(char *ip_address)
     char selection;
     while(true)
     {
-        selection = get_user_input_character(" user > ", false);
+        selection = get_user_input_character(USER_PROMPT, false);
 
         switch(selection)
         {
@@ -176,8 +185,13 @@ void console_task(char *ip_address)
                 configure_wifi();
                 break;
             case 'b':
-                printf("robot > Unfortunately Bluetooth configuration has not been implemented yet.\n");
+                printf("%sUnfortunately Bluetooth configuration has not been implemented yet.\n", ROBOT_PROMPT);
                 break;
+            case 'y':
+                printf("%snice\n", ROBOT_PROMPT);
+                break;
+            default:
+                print_sad_message();
         }
     }
 }
