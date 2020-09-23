@@ -1,6 +1,17 @@
 # miniInvaderFW
 
 ## Getting started
+
+### Configure Wi-Fi or Bluetooth via serial
+* Connect board to computer via USB
+* Establish [serial connection](https://docs.espressif.com/projects/esp-idf/en/release-v4.1/get-started/establish-serial-connection.html)
+
+You can connect for example using screen:
+
+    screen [port] 115200
+
+## Development
+
 Install the Espressif toolchain: https://docs.espressif.com/projects/esp-idf/en/release-v4.1/
 
 Run menuconfig and ensure that:

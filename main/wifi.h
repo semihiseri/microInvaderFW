@@ -1,3 +1,3 @@
-#define WIFI_MAXIMUM_RETRY 3
+#define WIFI_MAXIMUM_RETRY 2
 
-void connect_wifi();
+void* connect_wifi();

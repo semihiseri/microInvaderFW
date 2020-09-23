@@ -20,6 +20,7 @@ static EventGroupHandle_t s_wifi_event_group;
 
 static const char *TAG = "WIFI";
 static int s_retry_num = 0;
+esp_ip4_addr_t *esp_ip_address = NULL;
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
@@ -29,20 +30,21 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
         if (s_retry_num < WIFI_MAXIMUM_RETRY) {
             esp_wifi_connect();
             s_retry_num++;
-            ESP_LOGI(TAG, "retrying to connect to the WIFI");
+            ESP_LOGI(TAG, "retrying to connect to the Wi-Fi");
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
-        ESP_LOGI(TAG,"connecting to the WIFI failed");
+        ESP_LOGI(TAG,"connecting to the Wi-Fi failed");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        esp_ip_address = &event->ip_info.ip;
+        ESP_LOGI(TAG, "got ip: " IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
 
-void connect_wifi()
+void* connect_wifi()
 {
     s_wifi_event_group = xEventGroupCreate();
 
@@ -69,9 +71,9 @@ void connect_wifi()
             portMAX_DELAY);
 
     if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to WIFI");
+        ESP_LOGI(TAG, "connected to Wi-Fi");
     } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to WIFI");
+        ESP_LOGI(TAG, "Failed to connect to Wi-Fi");
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
@@ -79,4 +81,11 @@ void connect_wifi()
     ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
     ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
     vEventGroupDelete(s_wifi_event_group);
+
+    if (esp_ip_address == NULL) {
+        return "Connection error";
+    }
+    void *ip_address = malloc(16 * sizeof(char));
+    esp_ip4addr_ntoa(esp_ip_address, ip_address, 16);
+    return ip_address;
 }
