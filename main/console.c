@@ -60,7 +60,7 @@ void print_sad_message()
     printf("%s%s\n", ROBOT_PROMPT, sad_messages[message_id]);
 }
 
-void show_ip(char* ip_address)
+void show_ip(void* ip_address)
 {
     /* For some reason this does not seem to work:
     esp_netif_ip_info_t ip_info;
@@ -71,7 +71,7 @@ void show_ip(char* ip_address)
     }
     As a workaround the ip address is passed along to this task
     */
-    printf("%sIP address: %s\n", ROBOT_PROMPT, ip_address);
+    printf("%sIP address: %s\n", ROBOT_PROMPT, (char*)ip_address);
 }
 
 void configure_wifi()
@@ -141,7 +141,7 @@ void initialize_console()
     linenoiseHistorySetMaxLen(100);*/
 }
 
-void console_task(char *ip_address)
+void console_task(void *ip_address)
 {
     initialize_console();
 

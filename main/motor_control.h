@@ -14,5 +14,6 @@
 extern float motor_1_pwm;
 extern float motor_2_pwm;
 
+void motor_control_set_pwm_values(float motor_1, float motor_2);
 void motor_control_setup();
 void motor_control_task(void *args);

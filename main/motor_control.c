@@ -13,6 +13,12 @@
 float motor_1_pwm = 0;
 float motor_2_pwm = 0;
 
+void motor_control_set_pwm_values(float motor_1, float motor_2)
+{
+    motor_1_pwm = motor_1;
+    motor_2_pwm = motor_2;
+}
+
 void gpio_init()
 {
     printf("Motor control GPIO init\n");

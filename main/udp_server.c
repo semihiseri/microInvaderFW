@@ -13,6 +13,8 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
+#include "motor_control.h"
+
 static const char *TAG = "UDP Server";
 
 void udp_server_task(void *pvParameters)
@@ -72,7 +74,22 @@ void udp_server_task(void *pvParameters)
                 ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
                 ESP_LOGI(TAG, "%s", rx_buffer);
 
-                int err = sendto(sock, rx_buffer, len, 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
+                const char delimiter[2] = COMMAND_DELIMITER;
+                char *response = "OK";
+                char *left = strtok(rx_buffer, delimiter);
+                char *right = strtok(NULL, delimiter);
+
+                if (left != NULL && right != NULL) {
+                    int left_value = atoi(left);
+                    int right_value = atoi(right);
+                    ESP_LOGI(TAG, "Decoded values %s -> %d, %s -> %d", left, left_value, right, right_value);
+                    motor_control_set_pwm_values((float)left_value, (float)right_value);
+                } else {
+                    ESP_LOGI(TAG, "Received message is in wrong format.");
+                    response = "Error";
+                }
+
+                int err = sendto(sock, response, strlen(response), 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
                 if (err < 0) {
                     ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
                     break;
