@@ -83,7 +83,7 @@ void udp_server_task(void *pvParameters)
                     int left_value = atoi(left);
                     int right_value = atoi(right);
                     ESP_LOGI(TAG, "Decoded values %s -> %d, %s -> %d", left, left_value, right, right_value);
-                    motor_control_set_pwm_values((float)left_value, (float)right_value);
+                    motor_control_set_values((float)left_value, (float)right_value);
                 } else {
                     ESP_LOGI(TAG, "Received message is in wrong format.");
                     response = "Error";

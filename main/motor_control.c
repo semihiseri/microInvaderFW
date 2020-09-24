@@ -9,14 +9,13 @@
 #include "math.h"
 #include "stdio.h"
 
+float motor_value_left = 0;
+float motor_value_right = 0;
 
-float motor_1_pwm = 0;
-float motor_2_pwm = 0;
-
-void motor_control_set_pwm_values(float motor_1, float motor_2)
+void motor_control_set_values(float motor_left, float motor_right)
 {
-    motor_1_pwm = motor_1;
-    motor_2_pwm = motor_2;
+    motor_value_left = motor_left;
+    motor_value_right = motor_right;
 }
 
 void gpio_init()
@@ -37,8 +36,8 @@ void pwm_gpio_config()
 {
     printf("MCPWM GPIO init\n");
     mcpwm_pin_config_t pin_config = {
-        .mcpwm0a_out_num = MOTOR_1_PWM,
-        .mcpwm0b_out_num = MOTOR_2_PWM,
+        .mcpwm0a_out_num = RIGHT_MOTOR_PWM,
+        .mcpwm0b_out_num = LEFT_MOTOR_PWM,
     };
     
     mcpwm_set_pin(MCPWM_UNIT_0, &pin_config);
@@ -68,11 +67,11 @@ void motor_control_setup()
 
 void set_motor_directions()
 {
-    gpio_set_level(MOTOR_1_DIR_A, motor_1_pwm < 0);
-    gpio_set_level(MOTOR_1_DIR_B, motor_1_pwm >= 0);
+    gpio_set_level(RIGHT_MOTOR_DIR_FORWARD, motor_value_right >= 0);
+    gpio_set_level(RIGHT_MOTOR_DIR_REVERSE, motor_value_right < 0);
 
-    gpio_set_level(MOTOR_2_DIR_A, motor_2_pwm < 0);
-    gpio_set_level(MOTOR_2_DIR_B, motor_2_pwm >= 0);
+    gpio_set_level(LEFT_MOTOR_DIR_FORWARD, motor_value_left >= 0);
+    gpio_set_level(LEFT_MOTOR_DIR_REVERSE, motor_value_left < 0);
 }
 
 void set_motor_pwm(int motor, float pwm)
@@ -92,8 +91,8 @@ void motor_control_task(void *args)
     while (1)
     {
         set_motor_directions();
-        set_motor_pwm(MCPWM_OPR_A, motor_1_pwm);
-        set_motor_pwm(MCPWM_OPR_B, motor_2_pwm);
+        set_motor_pwm(MCPWM_OPR_A, motor_value_right);
+        set_motor_pwm(MCPWM_OPR_B, motor_value_left);
         
         vTaskDelay(10 / portTICK_RATE_MS);
     }

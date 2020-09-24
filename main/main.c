@@ -30,7 +30,6 @@
 
 //#define TEST_MODE
 #define BLUETOOTH
-//#define WIFI
 
 /*
  * This does stuff so that we can see everything works nicely
@@ -38,17 +37,17 @@
 void device_test(void)
 {
     int x;
-    
-    motor_1_pwm = 100;
-    motor_2_pwm = -100;
+
+    motor_value_left = 100;
+    motor_value_right = 100;
     
     while (1)
     {
         break;
         for (x=-100; x<100; x++)
         {
-            motor_1_pwm = x;
-            motor_2_pwm = x;
+            motor_value_left = x;
+            motor_value_right = x;
             
             wifi_led_state = x > 32;
             server_led_state = x > 65;
@@ -84,12 +83,6 @@ void app_main(void)
     
 #ifdef TEST_MODE
     device_test();
-#elif defined WIFI
-    //console_task();
-    /*while(1)
-    {
-        vTaskDelay(1000/portTICK_RATE_MS);
-    }*/
 #elif defined BLUETOOTH
     setup_bt();
 #endif
