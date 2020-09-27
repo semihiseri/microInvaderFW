@@ -47,41 +47,41 @@ void control_logic(uint8_t *data, uint16_t len)
         switch (curr)
         {
             case 'F':
-                motor_1_pwm = speed;
-                motor_2_pwm = -speed;
+                motor_value_right = speed;
+                motor_value_left = speed;
                 break;
             case 'B':
-                motor_1_pwm = -speed;
-                motor_2_pwm = speed;
+                motor_value_right = -speed;
+                motor_value_left = -speed;
                 break;
             case 'L':
-                motor_1_pwm = speed;
-                motor_2_pwm = speed;
+                motor_value_right = speed;
+                motor_value_left = -speed;
                 break;
             case 'R':
-                motor_1_pwm = -speed;
-                motor_2_pwm = -speed;
+                motor_value_right = -speed;
+                motor_value_left = speed;
                 break;
             case 'G':
-                motor_1_pwm = speed;
-                motor_2_pwm = -speed/2;
+                motor_value_right = speed;
+                motor_value_left = speed/2;
                 break;
             case 'I':
-                motor_1_pwm = speed/2;
-                motor_2_pwm = -speed;
+                motor_value_right = speed/2;
+                motor_value_left = speed;
                 break;
             case 'H':
-                motor_1_pwm = -speed;
-                motor_2_pwm = speed/2;
+                motor_value_right = -speed;
+                motor_value_left = -speed/2;
                 break;
             case 'J':
-                motor_1_pwm = -speed/2;
-                motor_2_pwm = speed;
+                motor_value_right = -speed/2;
+                motor_value_left = -speed;
                 break;
             case 'D':
             case 'S':
-                motor_1_pwm = 0;
-                motor_2_pwm = 0;
+                motor_value_right = 0;
+                motor_value_left = 0;
                 break;
             
             case '1':
@@ -114,8 +114,6 @@ void control_logic(uint8_t *data, uint16_t len)
             case 'q':
                 speed = 100;
                 break;
-                
-            
         }
     }
 }
